@@ -7,6 +7,7 @@ use App\Http\Resources\Booking\BookingResources;
 use App\Models\Booking;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use SebastianBergmann\Diff\Exception;
 
 class BookingController extends Controller
 {
@@ -38,6 +39,16 @@ class BookingController extends Controller
            'start_date' => Carbon::now(),
            'end_date' => Carbon::now()->addDays(7)
         ]);
+        try {
+            Booking::create($request->all());
+            return response()->json([
+                'message' => 'Автомобиль забронирован.'
+            ]);
+        } catch (\Exception $exception) {
+            return responce()->json([
+               'message' => $exception->getMessage()
+            ]);
+        }
         Booking::create($request->all());
         return response()->json([
             'message' => 'Автомобиль забронирован.'

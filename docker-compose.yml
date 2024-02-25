@@ -1,0 +1,53 @@
+version: "3.8"
+
+networks:
+    auto-app-network:
+        driver: bridge
+
+services:
+    auto_app_nginx:
+        restart: always
+        container_name: auto-app-nginx
+        build:
+            context: ./.docker/nginx
+            dockerfile: Dockerfile
+        depends_on:
+            -   auto-app-php
+        ports:
+            -   "8000:80"
+        volumes:
+            -   "./.:/app/"
+        networks:
+            - auto-app-network
+
+    auto_app_php:
+        restart: always
+        container_name: auto-app-php
+        build:
+            context: ./
+            dockerfile: Dockerfile
+        depends_on:
+            - auto-app-postgres
+        env_file:
+            -   ./.env
+        volumes:
+            - "./.:/app/"
+        networks:
+            - auto-app-network
+
+    auto_app_postgres:
+        restart: always
+        build:
+            context: ./.docker/pgsql
+            dockerfile: Dockerfile
+        container_name: auto-app-postgres
+        ports:
+            - "5430:5432"
+        environment:
+            - POSTGRES_USER=auto_u
+            - POSTGRES_PASSWORD=123
+        networks:
+            - auto-app-network
+        volumes:
+            -   "./.data/database/postgres/data:/var/lib/postgresql/data"
+
